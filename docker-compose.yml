@@ -1,0 +1,60 @@
+version: "3"
+
+services:
+  postgresd:
+    image: postgres:12-alpine
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-passwordpostgres}
+      - POSTGRES_DB=${POSTGRES_DB:-appdb}
+    healthcheck:
+      test: pg_isready -U postgres -d ${POSTGRES_DB}
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  passkey-migrate:
+    image: ghcr.io/teamhanko/hanko:v0.10.0
+    volumes:
+      - type: bind
+        source: ./apps/hanko/config.yml
+        target: /etc/config/config.yml
+    command: --config /etc/config/config.yml migrate up
+    restart: on-failure
+    depends_on:
+      postgresd:
+        condition: service_healthy
+  passkey:
+    image: ghcr.io/teamhanko/hanko:v0.10.0
+    depends_on:
+      passkey-migrate:
+        condition: service_completed_successfully
+    ports:
+      - 8000:8000
+      - 8001:8001 # admin api
+    volumes:
+      - type: bind
+        source: ./apps/hanko/config.yml
+        target: /etc/config/config.yml
+    command: serve --config /etc/config/config.yml all
+    environment:
+      - PASSWORD_ENABLED
+
+  pgadmin:
+    image: dpage/pgadmin4:8
+    ports:
+      - 8080:80
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-pgadmin@test.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_EMAIL:-password}
+    depends_on:
+      postgresd:
+        condition: service_healthy
+  mail:
+    image: axllent/mailpit:latest
+    ports:
+      - 8025:8025 # Web UI
+      - 1025:1025 # SMTP

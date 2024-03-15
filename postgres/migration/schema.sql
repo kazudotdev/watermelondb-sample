@@ -1,0 +1,13 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE groups (
+  id uuid PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+  name VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE users_groups(
+  user_id uuid REFERENCES users(id) ON UPDATE CASCADE ON DELETE CASCADE,
+  group_id uuid REFERENCES groups(id) ON UPDATE CASCADE ON DELETE CASCADE,
+  PRIMARY KEY (user_id, group_id)
+)
