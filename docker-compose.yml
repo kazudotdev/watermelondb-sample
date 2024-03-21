@@ -1,20 +1,22 @@
-version: "3"
+version: "3.7"
 
 services:
   postgresd:
-    image: postgres:12-alpine
-    ports:
-      - 5432:5432
+    image: postgres:16-alpine
+    expose:
+      - 5432
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-passwordpostgres}
-      - POSTGRES_DB=${POSTGRES_DB:-appdb}
+      - POSTGRES_DB=${POSTGRES_DB:-dev}
     healthcheck:
-      test: pg_isready -U postgres -d ${POSTGRES_DB}
+      test: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
       interval: 10s
       timeout: 10s
       retries: 3
       start_period: 30s
+    networks:
+      - app_internal
 
   passkey-migrate:
     image: ghcr.io/teamhanko/hanko:v0.10.0
@@ -27,6 +29,9 @@ services:
     depends_on:
       postgresd:
         condition: service_healthy
+    networks:
+      - app_internal
+
   passkey:
     image: ghcr.io/teamhanko/hanko:v0.10.0
     depends_on:
@@ -42,19 +47,17 @@ services:
     command: serve --config /etc/config/config.yml all
     environment:
       - PASSWORD_ENABLED
-
-  pgadmin:
-    image: dpage/pgadmin4:8
-    ports:
-      - 8080:80
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL:-pgadmin@test.com}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_EMAIL:-password}
-    depends_on:
-      postgresd:
-        condition: service_healthy
+    networks:
+      - app_internal
   mail:
     image: axllent/mailpit:latest
     ports:
       - 8025:8025 # Web UI
       - 1025:1025 # SMTP
+    networks:
+      - app_internal
+
+networks:
+  app_internal:
+    name: app_internal
+    internal: true

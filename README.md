@@ -1,17 +1,7 @@
-# watermelondb-sample
+# Sample
 
-To install dependencies:
+## migration
 
-```bash
-bun install
 ```
-
-To run:
-
-```bash
-bun run index.ts
+docker run -it --rm --network app_internal -v $(pwd)/migration:/migration migrate/migrate:4 -path /migration -database 'postgres://admin:password@postgresd:5432/dev?sslmode=disable' up
 ```
-
-This project was created using `bun init` in bun v1.0.3. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
-# watermelondb-sample
-# watermelondb-sample

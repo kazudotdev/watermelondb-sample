@@ -2,12 +2,12 @@
 account:
   allow_deletion: true
 database:
-  database: appdb
+  database: dev
   dialect: postgres
   host: postgresd
   port: 5432
-  user: postgres
-  password: passwordpostgres
+  user: admin
+  password: password
 smtp:
   host: "mail"
   port: "1025"
