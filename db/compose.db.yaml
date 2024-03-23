@@ -8,7 +8,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-passwordpostgres}
       - POSTGRES_DB=${POSTGRES_DB:-dev}
     healthcheck:
-      test: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+      test: pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-dev}
       interval: 10s
       timeout: 10s
       retries: 3
@@ -19,9 +19,9 @@ services:
   migrate:
     image: migrate/migrate:4
     environment:
-      - DB_USER=${POSTGRES_USER}
-      - DB_PASS=${POSTGRES_PASSWORD}
-      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASS=${POSTGRES_PASSWORD:-passwordpostgres}
+      - DB_NAME=${POSTGRES_DB:-dev}
       - MIGRATION_DIR=/migration/
       - DB_HOST=db
       - DB_PORT=5432
