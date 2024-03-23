@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-passwordpostgres}
+      - POSTGRES_DB=${POSTGRES_DB:-dev}
+    healthcheck:
+      test: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - localnet
+
+  migrate:
+    image: migrate/migrate:4
+    environment:
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASS=${POSTGRES_PASSWORD}
+      - DB_NAME=${POSTGRES_DB}
+      - MIGRATION_DIR=/migration/
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_OPTS=sslmode=disable
+    volumes:
+      - ./entrypoint.sh:/entrypoint.sh
+      - ./migration/:/migration
+    entrypoint: /bin/sh /entrypoint.sh
+    command: up
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+        - localnet
+

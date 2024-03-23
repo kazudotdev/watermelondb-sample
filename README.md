@@ -2,6 +2,11 @@
 
 ## migration
 
+- create migration files
 ```
-docker run -it --rm --network app_internal -v $(pwd)/migration:/migration migrate/migrate:4 -path /migration -database 'postgres://admin:password@postgresd:5432/dev?sslmode=disable' up
+docker compose run migrate create -dir /migration -seq -ext sql {migration name}
+```
+- apply migration files
+```
+docker compose run migrate up
 ```

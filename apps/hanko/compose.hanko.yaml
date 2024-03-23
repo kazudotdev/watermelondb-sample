@@ -1,0 +1,39 @@
+services:
+  passkey:
+    image: ghcr.io/teamhanko/hanko:v0.10.0
+    ports:
+      - 8000:8000
+      - 8001:8001 # admin api
+    volumes:
+      - type: bind
+        source: ./config.yml
+        target: /etc/config/config.yml
+    command: serve --config /etc/config/config.yml all
+    environment:
+      - PASSWORD_ENABLED
+    depends_on:
+      passkey-migrate:
+        condition: service_completed_successfully
+    networks:
+      - localnet
+  mail:
+    image: axllent/mailpit:latest
+    ports:
+      - 8025:8025 # Web UI
+      - 1025:1025 # SMTP
+    networks:
+      - localnet 
+
+  passkey-migrate:
+    image: ghcr.io/teamhanko/hanko:v0.10.0
+    volumes:
+      - type: bind
+        source: ./config.yml
+        target: /etc/config/config.yml
+    command: --config /etc/config/config.yml migrate up
+    restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - localnet

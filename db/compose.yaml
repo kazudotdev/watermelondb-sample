@@ -1,0 +1,5 @@
+version: "3.9"
+
+include:
+  - ../common.yaml
+  - ./compose.db.yaml
