@@ -18,11 +18,13 @@ services:
       - localnet
   mail:
     image: axllent/mailpit:latest
+    expose:
+      - 1025
     ports:
-      - 8025:8025 # Web UI
-      - 1025:1025 # SMTP
+      - 127.0.0.1:8025:8025 # Web UI
     networks:
-      - localnet 
+      - localnet
+      - tohost
 
   passkey-migrate:
     image: ghcr.io/teamhanko/hanko:v0.10.0
