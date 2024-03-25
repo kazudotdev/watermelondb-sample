@@ -1,4 +1,0 @@
-CREATE USER appuser;
-CREATE SCHEMA app;
-GRANT USAGE ON SCHEMA app TO appuser;
-GRANT SELECT ON ALL TABLES IN SCHEMA public to appuser;

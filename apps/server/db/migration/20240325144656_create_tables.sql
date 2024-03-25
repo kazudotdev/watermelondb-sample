@@ -1,3 +1,4 @@
+-- migrate:up
 SET SEARCH_PATH = app;
 
 CREATE TABLE users (
@@ -31,4 +32,12 @@ CREATE TABLE todos (
 );
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA app to appuser;
+
+
+
+-- migrate:down
+DROP TABLE app.todos;
+DROP TABLE app.users_groups;
+DROP TABLE app.groups;
+DROP TABLE app.users;
 

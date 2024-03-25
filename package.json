@@ -5,4 +5,9 @@
   ],
   "packageManager": "bun",
   "license": "UNLICENSED",
-  "private": true}
+  "private": true,
+  "devDependencies": {
+    "@testcontainers/postgresql": "^10.7.2",
+    "vitest": "^1.4.0"
+  }
+}

@@ -17,23 +17,24 @@ services:
       - localnet
 
   migrate:
-    image: migrate/migrate:4
+    image: ghcr.io/amacneil/dbmate
     environment:
       - DB_USER=${POSTGRES_USER:-postgres}
       - DB_PASS=${POSTGRES_PASSWORD:-passwordpostgres}
       - DB_NAME=${POSTGRES_DB:-dev}
-      - MIGRATION_DIR=/migration/
+      - DBMATE_MIGRATIONS_DIR=/db/migration
+      - DBMATE_MIGRATIONS_TABLE=public.migrations_version
+      - DBMATE_SCHEMA_FILE=/db/schema.sql 
       - DB_HOST=db
       - DB_PORT=5432
       - DB_OPTS=sslmode=disable
     volumes:
-      - ./entrypoint.sh:/entrypoint.sh
-      - ./migration/:/migration
+      - ./db/entrypoint.sh:/entrypoint.sh
+      - ./db:/db
     entrypoint: /bin/sh /entrypoint.sh
     command: up
     depends_on:
       db:
         condition: service_healthy
     networks:
-        - localnet
-
+      - localnet

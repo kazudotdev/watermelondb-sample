@@ -2,5 +2,5 @@ version: "3.9"
 include:
   - ./common.yaml
   - ./apps/hanko/compose.hanko.yaml
-  - ./db/compose.db.yaml
+  - ./apps/server/db/compose.db.yaml
 
