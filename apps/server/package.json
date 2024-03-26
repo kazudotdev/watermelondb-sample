@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "test": "DEBUG=testcontainers* vitest run"
+    "test": "vitest run",
+    "test:debug": "DEBUG=testcontainers* vitest run"
   },
   "devDependencies": {
     "@types/bun": "latest",

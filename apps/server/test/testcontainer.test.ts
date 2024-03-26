@@ -4,6 +4,7 @@ import {
   Wait,
 } from "testcontainers";
 import { Client } from "pg";
+import { createUser, getUser } from "../src/gen/sqlc/pg/user_sql";
 import fs from "fs";
 import { describe, test, beforeAll, afterAll, expect } from "vitest";
 
@@ -44,5 +45,14 @@ describe("start testcontainers", async () => {
 
   test("setup", async () => {
     expect(true).toBe(true);
+  });
+
+  test("create user", async () => {
+    await createUser(client, { id: "7c5bc31c-1702-4109-bc0e-7229f0cf0ff8" });
+    const user = await getUser(client, {
+      id: "7c5bc31c-1702-4109-bc0e-7229f0cf0ff8",
+    });
+    expect(user).not.toBeNull();
+    expect(user!.id).toBe("7c5bc31c-1702-4109-bc0e-7229f0cf0ff8");
   });
 });

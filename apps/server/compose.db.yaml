@@ -38,3 +38,10 @@ services:
         condition: service_healthy
     networks:
       - localnet
+
+  sqlc:
+    image: sqlc/sqlc
+    volumes:
+      - ./:/working
+    working_dir: /working
+    command: generate
