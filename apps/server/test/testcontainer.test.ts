@@ -1,31 +1,48 @@
 import {
-  PostgreSqlContainer,
-  StartedPostgreSqlContainer,
-} from "@testcontainers/postgresql";
+  type StartedTestContainer,
+  GenericContainer,
+  Wait,
+} from "testcontainers";
+import { Client } from "pg";
+import fs from "fs";
 import { describe, test, beforeAll, afterAll, expect } from "vitest";
 
-const __dirname = import.meta.dirname;
-import * as path from "path";
-
 describe("start testcontainers", async () => {
-  let psqlContainer: StartedPostgreSqlContainer;
+  let postgres: StartedTestContainer;
+  let client: Client;
   beforeAll(async () => {
-    psqlContainer = await new PostgreSqlContainer()
-      .withCopyFilesToContainer([{
-        source: path.resolve("../db/migration/000001_init.up.sql"),
-        target: "/docker-entrypoint-initdb.d/init.sql"
-      }])
-      .withDefaultLogDriver()
+    postgres = await new GenericContainer("postgres:16-alpine")
+      .withWaitStrategy(Wait.forListeningPorts())
+      .withEnvironment({
+        POSTGRES_PASSWORD: "password",
+        POSTGRES_USER: "appuser",
+        POSTGRES_DB: "testdb",
+      })
+      .withExposedPorts(5432)
       .start();
-    const res = await psqlContainer.exec("ls /docker-entrypoint-initdb.d/");
-    console.log({ res: res.output });
+    client = new Client({
+      host: postgres.getHost(),
+      port: postgres.getMappedPort(5432),
+      database: "testdb",
+      user: "appuser",
+      password: "password",
+    });
+
+    await client.connect();
+    await client.query("SELECT 1");
+
+    const schema = fs.readFileSync("./db/schema.sql", "utf8");
+
+    // migration
+    await client.query(schema);
   });
 
   afterAll(async () => {
-    await psqlContainer.stop();
+    await client.end();
+    await postgres.stop();
   });
 
-  test("setup", () => {
+  test("setup", async () => {
     expect(true).toBe(true);
   });
 });
