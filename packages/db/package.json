@@ -1,0 +1,13 @@
+{
+  "name": "@my/db",
+  "type": "module",
+  "scripts": {
+    "generate": "docker compose -f docker/compose.yaml  run --rm sqlc generate"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

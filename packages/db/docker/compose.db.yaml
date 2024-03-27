@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:16-alpine
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-passwordpostgres}
+      - POSTGRES_DB=${POSTGRES_DB:-dev}
+    healthcheck:
+      test: pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-dev}
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - localnet
+
+  migrate:
+    image: ghcr.io/amacneil/dbmate
+    environment:
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASS=${POSTGRES_PASSWORD:-passwordpostgres}
+      - DB_NAME=${POSTGRES_DB:-dev}
+      - DBMATE_MIGRATIONS_DIR=/db/migration
+      - DBMATE_MIGRATIONS_TABLE=public.migrations_version
+      - DBMATE_SCHEMA_FILE=/db/schema.sql 
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_OPTS=sslmode=disable
+    volumes:
+      - ./entrypoint.sh:/entrypoint.sh
+      - ../schema:/db
+    entrypoint: /bin/sh /entrypoint.sh
+    command: up
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - localnet
+
+  sqlc:
+    image: sqlc/sqlc
+    volumes:
+      - ../:/working
+    working_dir: /working
+    command: generate
