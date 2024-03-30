@@ -2,12 +2,19 @@
   "name": "@my/db",
   "type": "module",
   "scripts": {
-    "generate": "docker compose -f docker/compose.yaml  run --rm sqlc generate"
+    "generate": "docker compose -f docker/compose.yaml  run --rm sqlc generate",
+    "test": "vitest run",
+    "test:debug": "DEBUG=testcontainers* vitest run"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "testcontainers": "^10.7.2",
+    "vitest": "^1.4.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "pg": "^8.11.3"
   }
 }
