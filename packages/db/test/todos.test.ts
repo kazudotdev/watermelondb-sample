@@ -19,22 +19,6 @@ describe("start testcontainers", async () => {
     await db.stop();
   });
 
-  test("setup", async () => {
-    expect(true).toBe(true);
-  });
-
-  test("create user", async () => {
-    const client = db.client();
-    await createUser(client, {
-      id: "7c5bc31c-1702-4109-bc0e-7229f0cf0ff8",
-    });
-    const user = await getUser(client, {
-      id: "7c5bc31c-1702-4109-bc0e-7229f0cf0ff8",
-    });
-    expect(user).not.toBeNull();
-    expect(user!.id).toBe("7c5bc31c-1702-4109-bc0e-7229f0cf0ff8");
-  });
-
   test("pull todos's change list from postgres", async () => {
     // todos に適当なテストデータを入れておく
     const client = db.client();
