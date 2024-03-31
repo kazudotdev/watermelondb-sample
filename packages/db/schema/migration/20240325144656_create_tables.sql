@@ -27,6 +27,7 @@ CREATE TABLE todos (
   group_id uuid ,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP DEFAULT NULL,
   CONSTRAINT fk_todos_owner_id FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_todos_group_id FOREIGN KEY (group_id) REFERENCES groups(id)
 );
