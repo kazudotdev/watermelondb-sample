@@ -4,27 +4,28 @@ interface Client {
     query: (config: QueryArrayConfig) => Promise<QueryArrayResult>;
 }
 
-export const getCreatedTodosListSinceQuery = `-- name: GetCreatedTodosListSince :many
-SELECT id, description, owner_id, group_id, created_at, updated_at
+export const getCreatedTodoListSinceQuery = `-- name: GetCreatedTodoListSince :many
+SELECT id, description, owner_id, group_id, created_at, updated_at, deleted_at
 FROM app.todos
 WHERE created_at > $1`;
 
-export interface GetCreatedTodosListSinceArgs {
+export interface GetCreatedTodoListSinceArgs {
     createdAt: Date | null;
 }
 
-export interface GetCreatedTodosListSinceRow {
+export interface GetCreatedTodoListSinceRow {
     id: string;
     description: string | null;
     ownerId: string | null;
     groupId: string | null;
     createdAt: Date | null;
     updatedAt: Date | null;
+    deletedAt: Date | null;
 }
 
-export async function getCreatedTodosListSince(client: Client, args: GetCreatedTodosListSinceArgs): Promise<GetCreatedTodosListSinceRow[]> {
+export async function getCreatedTodoListSince(client: Client, args: GetCreatedTodoListSinceArgs): Promise<GetCreatedTodoListSinceRow[]> {
     const result = await client.query({
-        text: getCreatedTodosListSinceQuery,
+        text: getCreatedTodoListSinceQuery,
         values: [args.createdAt],
         rowMode: "array"
     });
@@ -35,13 +36,14 @@ export async function getCreatedTodosListSince(client: Client, args: GetCreatedT
             ownerId: row[2],
             groupId: row[3],
             createdAt: row[4],
-            updatedAt: row[5]
+            updatedAt: row[5],
+            deletedAt: row[6]
         };
     });
 }
 
 export const getUpdatedTodoListSinceQuery = `-- name: GetUpdatedTodoListSince :many
-SELECT id, description, owner_id, group_id, created_at, updated_at
+SELECT id, description, owner_id, group_id, created_at, updated_at, deleted_at
 FROM app.todos
 WHERE updated_at > $1 AND created_at < $1`;
 
@@ -56,6 +58,7 @@ export interface GetUpdatedTodoListSinceRow {
     groupId: string | null;
     createdAt: Date | null;
     updatedAt: Date | null;
+    deletedAt: Date | null;
 }
 
 export async function getUpdatedTodoListSince(client: Client, args: GetUpdatedTodoListSinceArgs): Promise<GetUpdatedTodoListSinceRow[]> {
@@ -71,7 +74,34 @@ export async function getUpdatedTodoListSince(client: Client, args: GetUpdatedTo
             ownerId: row[2],
             groupId: row[3],
             createdAt: row[4],
-            updatedAt: row[5]
+            updatedAt: row[5],
+            deletedAt: row[6]
+        };
+    });
+}
+
+export const getDeletedTodoListSinceQuery = `-- name: GetDeletedTodoListSince :many
+SELECT id
+FROM app.todos
+WHERE deleted_at > $1`;
+
+export interface GetDeletedTodoListSinceArgs {
+    deletedAt: Date | null;
+}
+
+export interface GetDeletedTodoListSinceRow {
+    id: string;
+}
+
+export async function getDeletedTodoListSince(client: Client, args: GetDeletedTodoListSinceArgs): Promise<GetDeletedTodoListSinceRow[]> {
+    const result = await client.query({
+        text: getDeletedTodoListSinceQuery,
+        values: [args.deletedAt],
+        rowMode: "array"
+    });
+    return result.rows.map(row => {
+        return {
+            id: row[0]
         };
     });
 }
