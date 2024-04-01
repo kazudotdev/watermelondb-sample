@@ -2,6 +2,9 @@
   "name": "@my/db",
   "type": "module",
   "scripts": {
+    "dev": "docker compose --env-file ./docker/dev.env -f docker/compose.yaml up -d",
+    "down": "docker compose -f docker/compose.yaml down",
+    "psql": "docker compose -f docker/compose.yaml exec db psql -U admin -d dev",
     "generate": "docker compose -f docker/compose.yaml  run --rm sqlc generate",
     "test": "vitest run",
     "test:debug": "DEBUG=testcontainers* vitest run"
