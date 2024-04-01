@@ -1,5 +1,5 @@
 import Database from "./database";
-import { createUser, getUser } from "../src/sqlc/pg/user_sql";
+import { createUser, getUserById } from "../src/sqlc/pg/user_sql";
 import fs from "fs";
 import { describe, test, beforeAll, afterAll, expect } from "vitest";
 
@@ -19,10 +19,11 @@ describe("users", async () => {
     await createUser(client, {
       id: "7c5bc31c-1702-4109-bc0e-7229f0cf0ff8",
     });
-    const user = await getUser(client, {
+    const user = await getUserById(client, {
       id: "7c5bc31c-1702-4109-bc0e-7229f0cf0ff8",
     });
     expect(user).not.toBeNull();
     expect(user!.id).toBe("7c5bc31c-1702-4109-bc0e-7229f0cf0ff8");
+    console.log(JSON.stringify(user, null, 2));
   });
 });

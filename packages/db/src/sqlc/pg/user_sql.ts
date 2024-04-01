@@ -5,15 +5,18 @@ interface Client {
 }
 
 export const createUserQuery = `-- name: CreateUser :exec
-INSERT INTO app.users (id) VALUES ($1) RETURNING id, created_at`;
+WITH new_user AS ( 
+	INSERT INTO app.users(id) VALUES ($1)
+	RETURNING id
+ ), new_group AS (
+	INSERT INTO app.groups(owner_id)
+	SELECT id AS owner_id FROM new_user
+	RETURNING owner_id, id
+) INSERT INTO app.users_groups (user_id, group_id)
+SELECT owner_id AS user_id, id as group_id FROM new_group`;
 
 export interface CreateUserArgs {
     id: string;
-}
-
-export interface CreateUserRow {
-    id: string;
-    createdAt: Date | null;
 }
 
 export async function createUser(client: Client, args: CreateUserArgs): Promise<void> {
@@ -24,22 +27,36 @@ export async function createUser(client: Client, args: CreateUserArgs): Promise<
     });
 }
 
-export const getUserQuery = `-- name: GetUser :one
-SELECT id, created_at FROM app.users
-WHERE id = $1 LIMIT 1`;
+export const getUserByIdQuery = `-- name: GetUserById :one
+SELECT
+  u.id,
+  u.created_at,
+  array_agg(g.id)::UUID[] AS group_ids
+FROM app.users u
+  INNER JOIN
+    app.users_groups ug
+  ON
+    u.id = ug.user_id
+  INNER JOIN
+    app.groups g
+  ON
+    g.id = ug.group_id
+WHERE u.id = $1
+GROUP BY u.id`;
 
-export interface GetUserArgs {
+export interface GetUserByIdArgs {
     id: string;
 }
 
-export interface GetUserRow {
+export interface GetUserByIdRow {
     id: string;
     createdAt: Date | null;
+    groupIds: string[];
 }
 
-export async function getUser(client: Client, args: GetUserArgs): Promise<GetUserRow | null> {
+export async function getUserById(client: Client, args: GetUserByIdArgs): Promise<GetUserByIdRow | null> {
     const result = await client.query({
-        text: getUserQuery,
+        text: getUserByIdQuery,
         values: [args.id],
         rowMode: "array"
     });
@@ -49,7 +66,8 @@ export async function getUser(client: Client, args: GetUserArgs): Promise<GetUse
     const row = result.rows[0];
     return {
         id: row[0],
-        createdAt: row[1]
+        createdAt: row[1],
+        groupIds: row[2]
     };
 }
 
