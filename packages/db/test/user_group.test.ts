@@ -1,5 +1,10 @@
 import Database from "./database";
 import { createUser, getUserById } from "../src/sqlc/pg/user_sql";
+import {
+  createGroup,
+  getGroupById,
+  getGroupByOwnerId,
+} from "../src/sqlc/pg/group_sql";
 import fs from "fs";
 import { describe, test, beforeAll, afterAll, expect } from "vitest";
 
@@ -24,6 +29,23 @@ describe("users", async () => {
     });
     expect(user).not.toBeNull();
     expect(user!.id).toBe("7c5bc31c-1702-4109-bc0e-7229f0cf0ff8");
-    console.log(JSON.stringify(user, null, 2));
+    expect(user!.groupIds.length).toBe(1);
+  });
+
+  test("join multiple groups", async () => {
+    const testUuid = "ffffffff-eeee-cccc-bbbb-aaaaaaaaaaaa";
+    const client = db.client();
+    await createUser(client, { id: testUuid });
+    const groupId = await createGroup(client, {
+      ownerId: testUuid,
+      name: "group1",
+    });
+    const groups = await getGroupByOwnerId(client, {
+      ownerId: testUuid,
+    });
+    const user = await getUserById(client, { id: testUuid });
+    expect(groups.length).toBe(2); // 2 groups, one has been already created when createUser.
+    expect(user).not.toBeNull();
+    expect(user?.groupIds.includes(groups[0].id)).toBe(true);
   });
 });

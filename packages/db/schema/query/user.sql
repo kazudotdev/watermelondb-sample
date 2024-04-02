@@ -15,13 +15,7 @@ SELECT
   u.created_at,
   array_agg(g.id)::UUID[] AS group_ids
 FROM app.users u
-  INNER JOIN
-    app.users_groups ug
-  ON
-    u.id = ug.user_id
-  INNER JOIN
-    app.groups g
-  ON
-    g.id = ug.group_id
+  INNER JOIN app.users_groups ug ON u.id = ug.user_id
+  INNER JOIN app.groups g ON g.id = ug.group_id
 WHERE u.id = $1
 GROUP BY u.id;
