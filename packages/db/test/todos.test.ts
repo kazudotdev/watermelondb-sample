@@ -4,7 +4,7 @@ import {
   getUpdatedTodoListSince,
   getCreatedTodoListSince,
   getDeletedTodoListSince,
-} from "../src/sqlc/pg/sync_sql";
+} from "../src/sqlc/pg/todo_sql";
 import fs from "fs";
 import { describe, test, beforeAll, afterAll, expect } from "vitest";
 
