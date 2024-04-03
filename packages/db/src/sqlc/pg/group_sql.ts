@@ -4,7 +4,7 @@ interface Client {
     query: (config: QueryArrayConfig) => Promise<QueryArrayResult>;
 }
 
-export const createGroupQuery = `-- name: CreateGroup :exec
+export const createGroupQuery = `-- name: CreateGroup :one
 INSERT INTO app.groups (owner_id, name)
 VALUES ($1, $2) RETURNING id`;
 
@@ -17,12 +17,19 @@ export interface CreateGroupRow {
     id: string;
 }
 
-export async function createGroup(client: Client, args: CreateGroupArgs): Promise<void> {
-    await client.query({
+export async function createGroup(client: Client, args: CreateGroupArgs): Promise<CreateGroupRow | null> {
+    const result = await client.query({
         text: createGroupQuery,
         values: [args.ownerId, args.name],
         rowMode: "array"
     });
+    if (result.rows.length !== 1) {
+        return null;
+    }
+    const row = result.rows[0];
+    return {
+        id: row[0]
+    };
 }
 
 export const getGroupByOwnerIdQuery = `-- name: GetGroupByOwnerId :many

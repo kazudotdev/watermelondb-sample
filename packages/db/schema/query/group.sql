@@ -1,4 +1,4 @@
--- name: CreateGroup :exec
+-- name: CreateGroup :one
 INSERT INTO app.groups (owner_id, name)
 VALUES (@owner_id, @name) RETURNING id;
 

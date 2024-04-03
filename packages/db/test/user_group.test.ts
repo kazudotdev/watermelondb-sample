@@ -36,7 +36,7 @@ describe("users", async () => {
     const testUuid = "ffffffff-eeee-cccc-bbbb-aaaaaaaaaaaa";
     const client = db.client();
     await createUser(client, { id: testUuid });
-    const groupId = await createGroup(client, {
+    const group = await createGroup(client, {
       ownerId: testUuid,
       name: "group1",
     });
@@ -47,5 +47,7 @@ describe("users", async () => {
     expect(groups.length).toBe(2); // 2 groups, one has been already created when createUser.
     expect(user).not.toBeNull();
     expect(user?.groupIds.includes(groups[0].id)).toBe(true);
+    expect(group).not.toBeNull();
+    group && user && expect(user.groupIds.includes(group.id));
   });
 });
