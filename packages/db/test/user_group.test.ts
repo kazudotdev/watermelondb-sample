@@ -28,8 +28,8 @@ describe("users", async () => {
       id: "7c5bc31c-1702-4109-bc0e-7229f0cf0ff8",
     });
     expect(user).not.toBeNull();
-    expect(user!.id).toBe("7c5bc31c-1702-4109-bc0e-7229f0cf0ff8");
-    expect(user!.groupIds.length).toBe(1);
+    user && expect(user.id).toBe("7c5bc31c-1702-4109-bc0e-7229f0cf0ff8");
+    user && expect(user.groupIds.length).toBe(1);
   });
 
   test("join multiple groups", async () => {
@@ -46,7 +46,7 @@ describe("users", async () => {
     const user = await getUserById(client, { id: testUuid });
     expect(groups.length).toBe(2); // 2 groups, one has been already created when createUser.
     expect(user).not.toBeNull();
-    expect(user?.groupIds.includes(groups[0].id)).toBe(true);
+    user && expect(user.groupIds.includes(groups[0].id)).toBe(true);
     expect(group).not.toBeNull();
     group && user && expect(user.groupIds.includes(group.id));
   });
