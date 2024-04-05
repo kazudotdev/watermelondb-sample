@@ -1,30 +1,20 @@
-import Database from "./database";
-import PostgresWrapper from "../src/client";
-import { createUser, getUserById } from "../src/sqlc/pg/user_sql";
-import { describe, test, beforeAll, afterAll, expect } from "vitest";
-import fs from "fs";
+import { adminClient, userClient } from "./global_setup";
+import { GuardedClient } from "../src/client";
+import { describe, test, expect } from "vitest";
 
-describe("start testcontainers", async () => {
-  const db = new Database();
-  beforeAll(async () => {
-    const schema = fs.readFileSync("./schema/schema.sql", "utf8");
-    await db.setup(schema);
-  });
-
-  afterAll(async () => {
-    await db.stop();
-  });
-
-  test("call client", async () => {
-    const wrapperClient = new PostgresWrapper(db.client());
-    await createUser(wrapperClient, {
-      id: "7c5cc31c-1702-4109-bc0e-7229f0cf0ff8",
-    });
-
-    const res = await getUserById(wrapperClient, {
-      id: "7c5cc31c-1702-4109-bc0e-7229f0cf0ff8",
-    });
+describe("testcontainers", async () => {
+  test("admin", async () => {
+    const client = await adminClient();
+    const res = await client.query("SELECT * from pg_tables");
     expect(res).not.toBeNull();
-    expect(res!.id).toBe("7c5cc31c-1702-4109-bc0e-7229f0cf0ff8");
+    client.release();
+  });
+
+  test("user", async () => {
+    const client = await userClient();
+    const guardClient = new GuardedClient(client, { userId: "xxxx" });
+    const res = await guardClient.query("SELECT 1");
+    expect(res).not.toBeNull();
+    client.release();
   });
 });

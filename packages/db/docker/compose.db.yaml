@@ -24,7 +24,7 @@ services:
       - DB_NAME=${POSTGRES_DB:-dev}
       - DBMATE_MIGRATIONS_DIR=/db/migration
       - DBMATE_MIGRATIONS_TABLE=public.migrations_version
-      - DBMATE_SCHEMA_FILE=/db/schema.sql 
+      - DBMATE_SCHEMA_FILE=/db/schema.sql
       - DB_HOST=db
       - DB_PORT=5432
       - DB_OPTS=sslmode=disable

@@ -106,3 +106,45 @@ export async function getDeletedTodoListSince(client: Client, args: GetDeletedTo
     });
 }
 
+export const createTodoQuery = `-- name: CreateTodo :one
+INSERT INTO app.todos (
+  owner_id,
+  description
+) VALUES ( $1, $2 ) RETURNING id, description, owner_id, group_id, created_at, updated_at, deleted_at`;
+
+export interface CreateTodoArgs {
+    ownerId: string | null;
+    description: string | null;
+}
+
+export interface CreateTodoRow {
+    id: string;
+    description: string | null;
+    ownerId: string | null;
+    groupId: string | null;
+    createdAt: Date | null;
+    updatedAt: Date | null;
+    deletedAt: Date | null;
+}
+
+export async function createTodo(client: Client, args: CreateTodoArgs): Promise<CreateTodoRow | null> {
+    const result = await client.query({
+        text: createTodoQuery,
+        values: [args.ownerId, args.description],
+        rowMode: "array"
+    });
+    if (result.rows.length !== 1) {
+        return null;
+    }
+    const row = result.rows[0];
+    return {
+        id: row[0],
+        description: row[1],
+        ownerId: row[2],
+        groupId: row[3],
+        createdAt: row[4],
+        updatedAt: row[5],
+        deletedAt: row[6]
+    };
+}
+
