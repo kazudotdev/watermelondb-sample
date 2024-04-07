@@ -7,13 +7,25 @@ interface Client {
   release?: (err?: Error | boolean) => void;
 }
 
+type GuardedClientOptions = {
+  userId: string;
+  debug?: boolean;
+};
+
 export class GuardedClient implements Client {
   private client: Client;
   private userId: string;
-  constructor(client: Client, { userId }: { userId: string }) {
+  private debug: boolean;
+  constructor(client: Client, { userId, debug = false }: GuardedClientOptions) {
     if (!client.release) throw new Error("need to implement release function");
+    this.debug = debug;
     this.client = client;
     this.userId = userId;
+  }
+  withDebug(debug = true) {
+    this.debug = debug;
+    console.log("withDebug", this.debug);
+    return this;
   }
   async query(
     queryTextOrConfig: string | QueryArrayConfig,
@@ -26,7 +38,7 @@ export class GuardedClient implements Client {
         );
       })
       .then(async (_) => {
-        console.log(queryTextOrConfig);
+        this.debug && console.log(queryTextOrConfig);
         return this.client.query(queryTextOrConfig).then(async (r) => {
           await this.client.query("COMMIT");
           return r;

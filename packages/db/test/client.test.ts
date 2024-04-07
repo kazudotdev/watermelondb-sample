@@ -12,9 +12,17 @@ describe("testcontainers", async () => {
 
   test("user", async () => {
     const client = await userClient();
-    const guardClient = new GuardedClient(client, { userId: "xxxx" });
+    const guardClient = new GuardedClient(client, {
+      userId: "xxxx",
+    });
     const res = await guardClient.query("SELECT 1");
     expect(res).not.toBeNull();
     client.release();
+  });
+
+  test("client withDebug mode", async () => {
+    const client = await userClient();
+    const guard = new GuardedClient(client, { userId: "xxxxx" }).withDebug();
+    await guard.query("select * from pg_tables");
   });
 });
