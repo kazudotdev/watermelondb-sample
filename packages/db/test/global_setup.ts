@@ -3,32 +3,8 @@ import {
   Wait,
   type StartedTestContainer,
 } from "testcontainers";
-import { Pool } from "pg";
+import { Connection, type DatabaseConfig } from "../src/client";
 import fs from "fs";
-
-type DatabaseConfig = {
-  user: string;
-  password?: string;
-  database: string;
-  host?: string;
-  port?: number;
-  max?: number;
-};
-
-class Connection {
-  private pool?: Pool;
-  constructor() {}
-  client(config: DatabaseConfig) {
-    if (!this.pool) {
-      this.pool = new Pool(config);
-    }
-    return this.pool.connect();
-  }
-
-  release() {
-    if (this.pool) this.pool.end();
-  }
-}
 
 class Container {
   private real?: StartedTestContainer;
@@ -76,41 +52,31 @@ class Container {
   }
 }
 
-class Database {
-  private conn: Connection;
-  private container: Container;
-  constructor(container: Container) {
-    this.conn = new Connection();
-    this.container = container;
-  }
-
-  async client({ user, password, database }: DatabaseConfig) {
-    return await this.conn.client({
-      user,
-      password,
-      database,
-      ...this.container.settings,
-    });
-  }
-
-  async end() {
-    this.conn.release();
-    await this.container.stop();
-  }
-}
-
 const container = await new Container().start({
   user: "admin",
   password: "password",
   database: "testdb",
 });
-const admin = new Database(container);
-const user = new Database(container);
+
+const adminConn = new Connection();
+const userConn = new Connection();
 
 export const adminClient = () =>
-  admin.client({ user: "admin", password: "password", database: "testdb" });
+  adminConn.client({
+    user: "admin",
+    password: "password",
+    database: "testdb",
+    max: 1,
+    ...container.settings,
+  });
 export const userClient = () =>
-  user.client({ user: "appuser", password: "password", database: "testdb" });
+  userConn.client({
+    user: "appuser",
+    password: "password",
+    database: "testdb",
+    max: 1,
+    ...container.settings,
+  });
 
 export const setup = async () => {
   const client = await adminClient();
@@ -130,6 +96,7 @@ export const setup = async () => {
 };
 
 export const teardown = async () => {
-  await admin.end();
-  await user.end();
+  await Promise.all([adminConn.end(), userConn.end()]).then((_) => {
+    container.stop();
+  });
 };

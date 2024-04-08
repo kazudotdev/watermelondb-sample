@@ -1,4 +1,5 @@
-import { type QueryArrayConfig, type QueryArrayResult } from "pg";
+import type { QueryArrayConfig, QueryArrayResult } from "pg";
+import { Pool } from "pg";
 
 interface Client {
   query: (
@@ -11,6 +12,30 @@ type GuardedClientOptions = {
   userId: string;
   debug?: boolean;
 };
+
+export type DatabaseConfig = {
+  user: string;
+  password?: string;
+  database: string;
+  host?: string;
+  port?: number;
+  max?: number;
+};
+
+export class Connection {
+  private pool?: Pool;
+  constructor() {}
+  client(config: DatabaseConfig) {
+    if (!this.pool) {
+      this.pool = new Pool(config);
+    }
+    return this.pool.connect();
+  }
+
+  async end() {
+    if (this.pool) await this.pool.end();
+  }
+}
 
 export class GuardedClient implements Client {
   private client: Client;
