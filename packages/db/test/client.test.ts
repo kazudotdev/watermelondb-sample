@@ -1,5 +1,5 @@
 import { adminClient, userClient } from "./global_setup";
-import { GuardedClient } from "../src/client";
+import { GuardedClient } from "../src/server/client";
 import { describe, test, expect } from "vitest";
 
 describe("testcontainers", async () => {

@@ -5,7 +5,7 @@ import {
 } from "../src/sqlc/pg/todo_sql";
 import { describe, test, afterAll, expect } from "vitest";
 import { userClient } from "./global_setup";
-import { GuardedClient } from "../src/client";
+import { GuardedClient } from "../src/server/client";
 
 describe("start testcontainers", async () => {
   const client = await userClient();

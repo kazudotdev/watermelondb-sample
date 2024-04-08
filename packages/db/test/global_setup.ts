@@ -3,7 +3,7 @@ import {
   Wait,
   type StartedTestContainer,
 } from "testcontainers";
-import { Connection, type DatabaseConfig } from "../src/client";
+import { Connection, type DatabaseConfig } from "../src/server/client";
 import fs from "fs";
 
 class Container {
