@@ -1,10 +1,6 @@
 import { userClient } from "./global_setup";
 import { createUser, getUserById } from "../src/sqlc/pg/user_sql";
-import {
-  createGroup,
-  getGroupById,
-  getGroupByOwnerId,
-} from "../src/sqlc/pg/group_sql";
+import { createGroup, getGroupByOwnerId } from "../src/sqlc/pg/group_sql";
 import { describe, test, expect } from "vitest";
 
 describe("users", async () => {
